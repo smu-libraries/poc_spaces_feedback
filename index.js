@@ -7,6 +7,14 @@
 let express = require('express');
 let cors = require('cors');
 let multer = require('multer');
+let sequelize = require('sequelize');
+
+let db = new sequelize('poc_spaces_feedback', null, null, {
+  host: 'localhost',
+  dialect: 'sqlite',
+  storage: 'poc_spaces_feedback.db'
+});
+let feedback = db.import(__dirname + '/feedback');
 
 let app = express();
 
@@ -17,12 +25,43 @@ let cors_options = {
   credentials: true,
   exposedHeaders: ['AMP-Access-Control-Allow-Source-Origin']
 };
-
 app.options('/poc_spaces_feedback', cors(cors_options));
 
+app.get('/poc_spaces_feedback', (req, res, next) => {
+  let where = {};
+  if (req.query.app_id) {
+    where.app_id = req.query.app_id;
+  }
+  if (req.query.start_date) {
+    let date = new Date(req.query.start_date);
+    date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
+    where.createdAt = where.createdAt || {};
+    where.createdAt.$gte = date;
+  }
+  if (req.query.end_date) {
+    let date = new Date(req.query.end_date);
+    date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
+    date.setHours(date.getHours() + 24);
+    where.createdAt = where.createdAt || {};
+    where.createdAt.$lt = date;
+  }
+  feedback.findAll({
+    attributes: [['createdAt', 'timestamp'], 'rating'],
+    where: where
+  }).then((result) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.json(result);
+  });
+});
+
 app.post('/poc_spaces_feedback', multer().single(), cors(cors_options), function (req, res, next) {
-  res.set('AMP-Access-Control-Allow-Source-Origin', req.query.__amp_source_origin);
-  res.json({});
+  feedback.create({
+    app_id: req.body.app_id,
+    rating: req.body.rating
+  }).then(() => {
+    res.set('AMP-Access-Control-Allow-Source-Origin', req.query.__amp_source_origin);
+    res.json({});
+  });
 });
 
 app.listen(process.env.PORT || 5000);
