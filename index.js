@@ -35,20 +35,17 @@ app.get('/poc_spaces_feedback', (req, res, next) => {
   if (req.query.start_date) {
     let date = new Date(req.query.start_date);
     date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
-    where.createdAt = where.createdAt || {};
-    where.createdAt.$gte = date;
+    where.created_at = where.created_at || {};
+    where.created_at.$gte = date;
   }
   if (req.query.end_date) {
     let date = new Date(req.query.end_date);
     date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
     date.setHours(date.getHours() + 24);
-    where.createdAt = where.createdAt || {};
-    where.createdAt.$lt = date;
+    where.created_at = where.created_at || {};
+    where.created_at.$lt = date;
   }
-  feedback.findAll({
-    attributes: [['createdAt', 'timestamp'], 'rating'],
-    where: where
-  }).then((result) => {
+  feedback.findAll({ where: where }).then((result) => {
     res.setHeader('Content-Type', 'application/json');
     res.json(result);
   });

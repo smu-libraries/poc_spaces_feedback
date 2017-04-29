@@ -13,7 +13,9 @@ module.exports = (db, DataTypes) => {
     rating: DataTypes.STRING,
     comment: { type: DataTypes.STRING, allowNull: true }
   }, {
-    timestamps: true
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
   });
 };
 
