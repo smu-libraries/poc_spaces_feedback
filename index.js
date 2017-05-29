@@ -54,7 +54,7 @@ app.get('/poc_spaces_feedback', (req, res, next) => {
 });
 
 app.post('/poc_spaces_feedback', multer().single(), cors(cors_options), function (req, res, next) {
-  if (!req.headers.Origin || !req.query.__amp_source_origin || req.headers.Origin !== EXPECTED_ORIGIN || req.headers.Origin !== req.query.__amp_source_origin) {
+  if (!req.headers.origin || !req.query.__amp_source_origin || req.headers.origin !== EXPECTED_ORIGIN || req.headers.origin !== req.query.__amp_source_origin) {
     res.status(403).end();
   } else {
     feedback.create({
